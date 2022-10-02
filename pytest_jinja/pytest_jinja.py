@@ -5,40 +5,42 @@ from pathlib import Path
 
 import jinja2
 
+OPTION_REPORT = "report"
+OPTION_TEMPLATE = "template"
 
 def pytest_addoption(parser):
     group = parser.getgroup("pytest-jinja")
     group.addoption(
-        "--html-report",
+        "--report",
         action="store",
-        dest="html_report_param",
+        dest=OPTION_REPORT,
         default=None,
         help="The report destination.",
     )
 
     group.addoption(
-        "--html-template",
+        "--template",
         action="store",
-        dest="jinja_template_param",
+        dest=OPTION_TEMPLATE,
         default=None,
-        help="A jinja-based html template.",
+        help="A jinja-based template.",
     )
 
 
 def pytest_configure(config):
-    report_path = config.getoption("html_report_param")
-    template_path = config.getoption("jinja_template_param")
+    report_path = config.getoption(OPTION_REPORT)
+    template_path = config.getoption(OPTION_TEMPLATE)
 
     if report_path and not hasattr(config, "slaveinput"):
-        config._html = JinjaReport(report_path, template_path, config)
-        config.pluginmanager.register(config._html)
+        config._report = JinjaReport(report_path, template_path, config)
+        config.pluginmanager.register(config._report)
 
 
 def pytest_unconfigure(config):
-    html = getattr(config, "_html", None)
-    if html:
-        del config._html
-        config.pluginmanager.unregister(html)
+    report = getattr(config, "_report", None)
+    if report:
+        del config._report
+        config.pluginmanager.unregister(report)
 
 
 class JinjaReport:
@@ -159,4 +161,4 @@ class JinjaReport:
         self._generate_report(session)
 
     def pytest_terminal_summary(self, terminalreporter):
-        terminalreporter.write_sep("-", "generated html file: {0}".format(self.report_path))
+        terminalreporter.write_sep("-", "generated file: {0}".format(self.report_path))

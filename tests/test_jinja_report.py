@@ -7,33 +7,33 @@ def run(testdir, report_path: str = "report.html", template_path: str = None, *a
     report_path = Path(testdir.tmpdir) / report_path
     if template_path:
         result = testdir.runpytest(
-            "--html-report", str(report_path), "--html-template", str(template_path), *args
+            "--report", str(report_path), "--template", str(template_path), *args
         )
     else:
-        result = testdir.runpytest("--html-report", str(report_path), *args)
+        result = testdir.runpytest("--report", str(report_path), *args)
     with open(str(report_path)) as f:
-        html = f.read()
-    return result, html
+        report = f.read()
+    return result, report
 
 
-def assert_results_by_outcome(html, test_outcome, test_outcome_number, label=None):
+def assert_results_by_outcome(report, test_outcome, test_outcome_number, label=None):
     # Asserts if the test number of this outcome in the summary is correct
     regex_summary = r"(\d)+ {}".format(label or test_outcome)
-    assert int(re.search(regex_summary, html).group(1)) == test_outcome_number
+    assert int(re.search(regex_summary, report).group(1)) == test_outcome_number
 
     # Asserts if the generated checkbox of this outcome is correct
     regex_checkbox = f'<input checked="true" class="filter" data-test-result="{test_outcome}"'
     if test_outcome_number == 0:
         regex_checkbox += r"(\s)+disabled"
-    assert re.search(regex_checkbox, html) is not None
+    assert re.search(regex_checkbox, report) is not None
 
     # Asserts if the table rows of this outcome are correct
     regex_table = f'tbody class="{test_outcome} '
-    assert len(re.findall(regex_table, html)) == test_outcome_number
+    assert len(re.findall(regex_table, report)) == test_outcome_number
 
 
 def assert_results(
-    html,
+    report,
     tests=1,
     duration=None,
     passed=1,
@@ -45,22 +45,22 @@ def assert_results(
     rerun=0,
 ):
     # Asserts total amount of tests
-    total_tests = re.search(r"(\d)+ tests ran", html)
+    total_tests = re.search(r"(\d)+ tests ran", report)
     assert int(total_tests.group(1)) == tests
 
     # Asserts tests running duration
     if duration is not None:
-        tests_duration = re.search(r"([\d,.]+) seconds", html)
+        tests_duration = re.search(r"([\d,.]+) seconds", report)
         assert float(tests_duration.group(1)) >= float(duration)
 
     # Asserts by outcome
-    assert_results_by_outcome(html, "passed", passed)
-    assert_results_by_outcome(html, "skipped", skipped)
-    assert_results_by_outcome(html, "failed", failed)
-    assert_results_by_outcome(html, "error", errors, "errors")
-    assert_results_by_outcome(html, "xfailed", xfailed, "expected failures")
-    assert_results_by_outcome(html, "xpassed", xpassed, "unexpected passes")
-    # assert_results_by_outcome(html, "rerun", rerun)
+    assert_results_by_outcome(report, "passed", passed)
+    assert_results_by_outcome(report, "skipped", skipped)
+    assert_results_by_outcome(report, "failed", failed)
+    assert_results_by_outcome(report, "error", errors, "errors")
+    assert_results_by_outcome(report, "xfailed", xfailed, "expected failures")
+    assert_results_by_outcome(report, "xpassed", xpassed, "unexpected passes")
+    # assert_results_by_outcome(report, "rerun", rerun)
 
 
 class TestPytestJinja:
@@ -70,37 +70,35 @@ class TestPytestJinja:
         result.stdout.fnmatch_lines(
             [
                 "pytest-jinja:",
-                "*--html-report=HTML_REPORT_PARAM",
-                "*The report destination.",
-                "*--html-template=JINJA_TEMPLATE_PARAM",
-                "*A jinja-based html template.",
+                "*--report=REPORT * The report destination.",
+                "*--template=TEMPLATE * A jinja-based template.",
             ]
         )
 
     def test_create_report_default_template(self, testdir):
         testdir.makepyfile("def test_pass(): pass")
         report_path = "report.html"
-        result, html = run(testdir, report_path)
+        result, report = run(testdir, report_path)
         assert result.ret == 0
         assert Path(report_path).exists()
-        assert "test_create_report" in html
-        assert '<span class="passed">1 passed</span>' in html
-        assert '<span class="skipped">0 skipped</span>' in html
-        assert '<span class="failed">0 failed</span>' in html
-        assert '<span class="error">0 errors</span>' in html
-        assert '<span class="xfailed">0 expected failures</span>' in html
-        assert '<span class="xpassed">0 unexpected passes</span>' in html
+        assert "test_create_report" in report
+        assert '<span class="passed">1 passed</span>' in report
+        assert '<span class="skipped">0 skipped</span>' in report
+        assert '<span class="failed">0 failed</span>' in report
+        assert '<span class="error">0 errors</span>' in report
+        assert '<span class="xfailed">0 expected failures</span>' in report
+        assert '<span class="xpassed">0 unexpected passes</span>' in report
         assert '<td class="col-result">passed<span class="collapser"></span></td>'
 
     def test_create_report_custom_template(self, testdir):
         testdir.makepyfile("def test_pass(): pass")
         report_path = "report.html"
         template_path = Path(__file__).parent / "test_template.html"
-        result, html = run(testdir, report_path=report_path, template_path=template_path)
+        result, report = run(testdir, report_path=report_path, template_path=template_path)
         assert result.ret == 0
         assert Path(report_path).exists()
-        assert "test_create_report_custom_template" in html
-        assert "<td>passed</td>" in html
+        assert "test_create_report_custom_template" in report
+        assert "<td>passed</td>" in report
 
     def test_all_outcomes_bootstrap(self, testdir):
         testdir.makepyfile(
@@ -120,10 +118,10 @@ class TestPytestJinja:
         )
         report_path = "report.html"
         template_path = Path(__file__).parent / "test_template.html"
-        result, html = run(testdir, report_path=report_path, template_path=template_path)
+        result, report = run(testdir, report_path=report_path, template_path=template_path)
         assert Path(report_path).exists()
         assert all(
-            tag in html for tag in ["<td>passed</td>", "<td>failed</td>", "<td>skipped</td>"]
+            tag in report for tag in ["<td>passed</td>", "<td>failed</td>", "<td>skipped</td>"]
         )
 
     def test_durations(self, testdir):
@@ -137,18 +135,18 @@ class TestPytestJinja:
                 sleep * 2
             )
         )
-        result, html = run(testdir)
+        result, report = run(testdir)
         assert result.ret == 0
-        assert_results(html, duration=sleep)
+        assert_results(report, duration=sleep)
         p = re.compile(r'<td class="col-duration">([\d,.]+)')
-        m = p.search(html)
+        m = p.search(report)
         assert float(m.group(1)) >= sleep
 
     def test_pass(self, testdir):
         testdir.makepyfile("def test_pass(): pass")
-        result, html = run(testdir)
+        result, report = run(testdir)
         assert result.ret == 0
-        assert_results(html)
+        assert_results(report)
 
     def test_skip(self, testdir):
         reason = str(random.random())
@@ -159,17 +157,17 @@ class TestPytestJinja:
                 pytest.skip('{reason}')
         """
         )
-        result, html = run(testdir)
+        result, report = run(testdir)
         assert result.ret == 0
-        assert_results(html, tests=0, passed=0, skipped=1)
-        assert f"Skipped: {reason}" in html
+        assert_results(report, tests=0, passed=0, skipped=1)
+        assert f"Skipped: {reason}" in report
 
     def test_fail(self, testdir):
         testdir.makepyfile("def test_fail(): assert False")
-        result, html = run(testdir)
+        result, report = run(testdir)
         assert result.ret
-        assert_results(html, passed=0, failed=1)
-        assert "AssertionError" in html
+        assert_results(report, passed=0, failed=1)
+        assert "AssertionError" in report
 
     def test_rerun(self, testdir):
         testdir.makepyfile(
@@ -180,9 +178,9 @@ class TestPytestJinja:
                 assert False
         """
         )
-        result, html = run(testdir)
+        result, report = run(testdir)
         assert result.ret
-        assert_results(html, passed=0, failed=1, rerun=5)
+        assert_results(report, passed=0, failed=1, rerun=5)
 
     def test_environment(self, testdir):
         content = str(random.random())
@@ -193,10 +191,10 @@ class TestPytestJinja:
         """
         )
         testdir.makepyfile("def test_pass(): pass")
-        result, html = run(testdir)
+        result, report = run(testdir)
         assert result.ret == 0
-        assert "Environment" in html
-        assert len(re.findall(content, html)) == 1
+        assert "Environment" in report
+        assert len(re.findall(content, report)) == 1
 
     def test_utf8_surrogate(self, testdir):
         testdir.makepyfile(
@@ -208,9 +206,9 @@ class TestPytestJinja:
                 pass
         """
         )
-        result, html = run(testdir)
+        result, report = run(testdir)
         assert result.ret == 0
-        assert_results(html, passed=1)
+        assert_results(report, passed=1)
 
     def test_record_properties(self, testdir):
         testdir.makepyfile(
@@ -223,6 +221,6 @@ class TestPytestJinja:
         )
         report_path = "report.html"
         template_path = Path(__file__).parent / "test_template.html"
-        result, html = run(testdir, report_path=report_path, template_path=template_path)
+        result, report = run(testdir, report_path=report_path, template_path=template_path)
         assert result.ret == 0
-        assert 'example = 123' in html
+        assert 'example = 123' in report
