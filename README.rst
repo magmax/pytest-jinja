@@ -14,11 +14,7 @@ It's based on pytest-html, but changes its inner working completely by separatin
     :target: https://pypi.org/project/pytest-jinja
     :alt: Python versions
 
-.. image:: https://dev.azure.com/gbon/pytest-jinja/_apis/build/status/g-bon.pytest-jinja?branchName=master
-    :target: https://dev.azure.com/gbon/pytest-jinja/_build/latest?definitionId=1&branchName=master
-    :alt: See Build Status on Azure Pipelines
-
-.. image:: https://img.shields.io/github/issues-raw/g-bon/pytest-jinja.svg
+.. image:: https://img.shields.io/github/issues-raw/magmax/pytest-jinja.svg
     :target: https://github.com/g-bon/pytest-jinja/issues
     :alt: Issues
 
@@ -30,7 +26,7 @@ Requirements
 
 You will need the following prerequisites in order to use pytest-html:
 
-* Python 3.6
+* Python 3.10
 
 
 Installation
