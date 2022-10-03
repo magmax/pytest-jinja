@@ -8,6 +8,7 @@ import jinja2
 OPTION_REPORT = "report"
 OPTION_TEMPLATE = "template"
 
+
 def pytest_addoption(parser):
     group = parser.getgroup("pytest-jinja")
     group.addoption(
@@ -47,9 +48,7 @@ class JinjaReport:
     def __init__(self, report_path, template_path, config):
         self.report_path = Path(os.path.expandvars(report_path)).expanduser().resolve()
         self.template_path = (
-            Path(template_path)
-            if template_path
-            else Path(__file__).parent / "templates/default/default.html"
+            Path(template_path) if template_path else Path(__file__).parent / "templates/default/default.html"
         )
         self.results = []
         self.tests_count = 0
@@ -129,7 +128,9 @@ class JinjaReport:
         template = jinja_template_env.get_template(str(Path(self.template_path).name))
         Path(self.report_path.parent).mkdir(parents=True, exist_ok=True)
 
-        template.stream(report=self,).dump(str(self.report_path))
+        template.stream(
+            report=self,
+        ).dump(str(self.report_path))
 
     def _generate_environment(self, config):
         if not hasattr(config, "_metadata"):
@@ -161,4 +162,4 @@ class JinjaReport:
         self._generate_report(session)
 
     def pytest_terminal_summary(self, terminalreporter):
-        terminalreporter.write_sep("-", "generated file: {0}".format(self.report_path))
+        terminalreporter.write_sep("-", f"generated file: {self.report_path}")

@@ -6,9 +6,7 @@ from pathlib import Path
 def run(testdir, report_path: str = "report.html", template_path: str = None, *args):
     report_path = Path(testdir.tmpdir) / report_path
     if template_path:
-        result = testdir.runpytest(
-            "--report", str(report_path), "--template", str(template_path), *args
-        )
+        result = testdir.runpytest("--report", str(report_path), "--template", str(template_path), *args)
     else:
         result = testdir.runpytest("--report", str(report_path), *args)
     with open(str(report_path)) as f:
@@ -18,7 +16,7 @@ def run(testdir, report_path: str = "report.html", template_path: str = None, *a
 
 def assert_results_by_outcome(report, test_outcome, test_outcome_number, label=None):
     # Asserts if the test number of this outcome in the summary is correct
-    regex_summary = r"(\d)+ {}".format(label or test_outcome)
+    regex_summary = rf"(\d)+ {label or test_outcome}"
     assert int(re.search(regex_summary, report).group(1)) == test_outcome_number
 
     # Asserts if the generated checkbox of this outcome is correct
@@ -120,9 +118,7 @@ class TestPytestJinja:
         template_path = Path(__file__).parent / "test_template.html"
         result, report = run(testdir, report_path=report_path, template_path=template_path)
         assert Path(report_path).exists()
-        assert all(
-            tag in report for tag in ["<td>passed</td>", "<td>failed</td>", "<td>skipped</td>"]
-        )
+        assert all(tag in report for tag in ["<td>passed</td>", "<td>failed</td>", "<td>skipped</td>"])
 
     def test_durations(self, testdir):
         sleep = float(0.2)
@@ -223,4 +219,4 @@ class TestPytestJinja:
         template_path = Path(__file__).parent / "test_template.html"
         result, report = run(testdir, report_path=report_path, template_path=template_path)
         assert result.ret == 0
-        assert 'example = 123' in report
+        assert "example = 123" in report
