@@ -19,6 +19,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
+          pip install --constraint=.github/workflows/constraints.txt poetry
           python -m pip install --upgrade pip
           poetry install -v
       - name: Test with pytest
