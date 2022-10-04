@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytest-jinja"
-version = "0.1.0"
+version = "0.1.2"
 description = "A plugin to generate customizable jinja-based HTML reports in pytest"
 authors = ["Gabriele Bonetti <gabriele.bonetti@gmail.com>"]
 license = "GPL-2.0"
