@@ -7,7 +7,7 @@ It's based on pytest-html, but changes its inner working completely by separatin
 
 
 .. image:: https://img.shields.io/badge/license-MPL%202.0-blue.svg
-   :target: https://github.com/g-bon/pytest-jinja/blob/master/LICENSE
+   :target: https://github.com/magmax/pytest-jinja/blob/master/LICENSE
    :alt: License
 
 .. image:: https://img.shields.io/pypi/pyversions/pytest-jinja.svg
@@ -15,8 +15,10 @@ It's based on pytest-html, but changes its inner working completely by separatin
     :alt: Python versions
 
 .. image:: https://img.shields.io/github/issues-raw/magmax/pytest-jinja.svg
-    :target: https://github.com/g-bon/pytest-jinja/issues
+    :target: https://github.com/magmax/pytest-jinja/issues
     :alt: Issues
+
+This version is a fork from [g-bon's pytest-jinja](https://github.com/g-bon/pytest-jinja).
 
 ----
 
@@ -40,15 +42,15 @@ Usage
 -----
 - if no template is specified a default template is used. The default template looks almost identical to pytest-html::
 
-    $ pytest testcase --html-report=test_report.html
+    $ pytest testcase --report=test_report.html
 
 - or you can pass your own template, pytest-jinja will render your template passing in the report data as jinja variables::
 
-    $ pytest testcase --html-report=test_report.html --html-template=my_template.html
+    $ pytest testcase --report=test_report.html --template=my_template.html
 
 Creating a custom template
 --------------------------
-You can create your own template by simply creating any html page. The report data is "passed" to the page as a single object called `report`. The attributes of this object contain all the necessary report data.
+You can create your own template by simply creating any template. The report data is "passed" to the page as a single object called `report`. The attributes of this object contain all the necessary report data.
 
 Template Example
 ----------------
@@ -89,6 +91,11 @@ Template Example
     </body>
     </html>
 
+Another Template Example
+------------------------
+.. code-block::
+
+    {{ report | json }}
 
 Available Report Data
 ---------------------
@@ -145,7 +152,7 @@ This `pytest`_ plugin was generated with `Cookiecutter`_ along with `@hackebrot`
 .. _`Cookiecutter`: https://github.com/audreyr/cookiecutter
 .. _`@hackebrot`: https://github.com/hackebrot
 .. _`cookiecutter-pytest-plugin`: https://github.com/pytest-dev/cookiecutter-pytest-plugin
-.. _`file an issue`: https://github.com/g-bon/pytest-jinja/issues
+.. _`file an issue`: https://github.com/magmax/pytest-jinja/issues
 .. _`pytest`: https://github.com/pytest-dev/pytest
 .. _`tox`: https://tox.readthedocs.io/en/latest/
 .. _`pip`: https://pypi.org/project/pip/
